@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!-- saved from url=(0028)file:///T:/25ASS1/index.html -->
+<html lang="de"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wetterabfrage</title>
+    <link rel="stylesheet" href="./Wetterabfrage_files/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease-in-out;
+            background-image: "./background.jpg";
+        }
+        #weather-output {
+            margin-top: 20px;
+        }
+        .btn-bordered {
+            border: 2px solid #000;
+            background-color: transparent;
+            color: #000;
+        }
+        .btn-bordered:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body style="background-image: url(&quot;./images.jfif&quot;);">
+    <div class="container">
+        <h1 class="text-center">Wetterabfrage</h1>
+        <div class="form-group">
+            <label for="city-input">Stadt eingeben</label>
+            <input type="text" class="form-control" id="city-input" placeholder="Stadt eingeben">
+        </div>
+        <button class="btn btn-bordered btn-block" onclick="fetchWeather()">Wetter abrufen</button>
+        <div id="weather-output" class="mt-3" style="display: block;">
+                    <h2>Wetter in Neuss</h2>
+                    <p>Temperatur: 7.14 °C</p>
+                    <p>Beschreibung: Ein paar Wolken</p>
+                    <p>Luftfeuchtigkeit: 84 %</p>
+                    <p>Windgeschwindigkeit: 3.09 m/s</p>
+                    <p>Luftdruck: 1011 hPa</p>
+                </div>
+    </div>
+
+    <script>
+        function fetchWeather() {
+            const city = document.getElementById('city-input').value;
+            const apiKey = 'bab281d79e5f1e9755a68d754cc313e7'; 
+            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=de`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Stadt nicht gefunden. Bitte überprüfe deinen Eingabewert.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayWeather(data);
+                })
+                .catch(error => {
+                    const weatherOutput = document.getElementById('weather-output');
+                    weatherOutput.innerHTML = `<p>${error.message}</p>`;
+                    weatherOutput.style.display = 'block'; 
+                });
+        }
+
+        function displayWeather(data) {
+            const weatherOutput = document.getElementById('weather-output');
+            if (data && data.weather && data.main) {
+                const weather = data.weather[0].main.toLowerCase();
+                const temperature = data.main.temp;
+                setBackground(weather, temperature);
+
+                weatherOutput.innerHTML = `
+                    <h2>Wetter in ${data.name}</h2>
+                    <p>Temperatur: ${data.main.temp} °C</p>
+                    <p>Beschreibung: ${data.weather[0].description}</p>
+                    <p>Luftfeuchtigkeit: ${data.main.humidity} %</p>
+                    <p>Windgeschwindigkeit: ${data.wind.speed} m/s</p>
+                    <p>Luftdruck: ${data.main.pressure} hPa</p>
+                `;
+                weatherOutput.style.display = 'block'; 
+            } else {
+                weatherOutput.innerHTML = `<p>Fehler beim Abrufen der Wetterdaten.</p>`;
+                weatherOutput.style.display = 'block'; 
+            }
+        }
+
+        function setBackground(weather, temperature) {
+            const body = document.body;
+
+            const backgrounds = {
+                clear: './images.jfif',
+                clouds:'./images.jfif',
+                rain: './regen.jfif',
+                drizzle: './regen.jfif',
+                thunderstorm: './regen.jfif',
+                snow: './snow.jfif',
+                mist: './images.jfif',
+                fog: './fog.jfif',
+                default: './images.jfif',
+            };
+
+            const backgroundImage = (temperature > 25)
+                ? './images/hot.jpg'
+                : backgrounds[weather] || backgrounds['default'];
+
+            body.style.backgroundImage = `url('${backgroundImage}')`;
+        }
+    </script>
+
+
+</body></html>
